@@ -1,0 +1,67 @@
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100vh;
+  font-family: 'Inter', sans-serif;
+  background-color: #121212;
+  color: #e0e0e0;
+}
+
+.app-container {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+.sidebar {
+  width: 300px;
+  background-color: #1e1e1e;
+  border-right: 1px solid #333;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+}
+
+.sidebar-header {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 20px;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sidebar-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.health-status {
+  padding: 10px;
+  border-radius: 8px;
+  background-color: #2a2a2a;
+  border: 1px solid #444;
+}
+
+.health-status.ok {
+  border-color: #4ade80;
+  color: #4ade80;
+}
+
+.health-status.error {
+  border-color: #f87171;
+  color: #f87171;
+}
+
+.canvas-area {
+  flex: 1;
+  position: relative;
+  background-color: #0f0f0f;
+  background-image: radial-gradient(#333 1px, transparent 1px);
+  background-size: 20px 20px;
+}

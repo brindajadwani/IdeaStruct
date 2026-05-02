@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+groq
+anthropic
+langsmith
+langchain
+python-dotenv
