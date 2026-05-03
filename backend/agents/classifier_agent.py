@@ -11,10 +11,16 @@ class ClassifierAgent:
     async def classify(self, raw_text: str) -> ClassifyResponse:
         system_prompt = """You are an expert Mind Map structure classifier. 
 Your job is to read raw ideas and generate 3 to 5 clarifying questions to help map out a proper hierarchy.
+Generate Multiple Choice Questions (MCQs) to make it easy for the user to answer.
 Output MUST be in valid JSON matching this schema:
 {
   "questions": [
-    {"id": "q1", "text": "What is the central theme of this map?", "type": "text"}
+    {
+      "id": "q1", 
+      "text": "What is the central theme of this map?", 
+      "type": "mcq",
+      "options": ["Option A", "Option B", "Option C"]
+    }
   ]
 }
 Return ONLY the JSON. No markdown formatting, no explanations."""

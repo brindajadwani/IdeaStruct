@@ -23,23 +23,60 @@ export const QuestionsPanel: React.FC = () => {
         <p className="text-xs text-slate-300 font-medium">
           System-generated clarification questions based on the input.
         </p>
-        
+
         <div className="space-y-3">
           {questions.map((q, index) => (
             <div key={q.id} className="bg-slate-200/95 backdrop-blur-sm rounded-xl p-3 shadow-inner">
-              <label className="block text-sm font-bold text-slate-800 mb-2">
+              <label className="block text-sm font-bold text-slate-800 mb-3">
                 Q{index + 1}: {q.text}
               </label>
-              <input
-                type="text"
-                className="w-full bg-white border border-slate-300 rounded-lg p-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all shadow-sm"
-                placeholder="Type your answer..."
-                value={answers[q.id] || ''}
-                onChange={(e) => setAnswer(q.id, e.target.value)}
-                disabled={!isActive}
-              />
+
+              {q.type === 'mcq' && q.options ? (
+                <div className="flex flex-wrap gap-2 mb-1">
+                  {q.options.map((opt) => {
+                    const isSelected = answers[q.id] === opt;
+                    return (
+                      <button
+                        key={opt}
+                        onClick={() => setAnswer(q.id, opt)}
+                        disabled={!isActive}
+                        className={`text-sm px-4 py-2 rounded-full border transition-all duration-300 cursor-pointer ${isSelected
+                          ? 'bg-gradient-to-r from-teal-500 to-emerald-500 text-white border-transparent shadow-md shadow-teal-500/30'
+                          : 'bg-white text-slate-700 border-slate-300 hover:border-teal-400 hover:bg-teal-50'
+                          }`}
+                      >
+                        {opt}
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : (
+                <textarea
+                  className="w-full bg-white border border-slate-300 rounded-lg p-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all shadow-sm resize-none"
+                  placeholder="Type your answer..."
+                  rows={2}
+                  value={answers[q.id] || ''}
+                  onChange={(e) => setAnswer(q.id, e.target.value)}
+                  disabled={!isActive}
+                />
+              )}
             </div>
           ))}
+
+          {/* Global Other Answer / Additional Context at the bottom */}
+          <div className="bg-slate-200/95 backdrop-blur-sm rounded-xl p-3 shadow-inner">
+            <label className="block text-sm font-bold text-slate-800 mb-2">
+              Other Answers / Additional Context
+            </label>
+            <textarea
+              className="w-full bg-white border border-slate-300 rounded-lg p-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all shadow-sm resize-none"
+              placeholder="Type any other answers or context here..."
+              rows={2}
+              value={answers['additional_context'] || ''}
+              onChange={(e) => setAnswer('additional_context', e.target.value)}
+              disabled={!isActive}
+            />
+          </div>
         </div>
 
         <button
