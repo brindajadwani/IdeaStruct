@@ -14,8 +14,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-from routers import classify_router
+from routers import classify_router, generate_router
 app.include_router(classify_router.router)
+app.include_router(generate_router.router)
 
 @app.get("/health")
 async def health_check():

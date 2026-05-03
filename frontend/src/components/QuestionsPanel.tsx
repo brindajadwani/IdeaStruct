@@ -7,8 +7,67 @@ export const QuestionsPanel: React.FC = () => {
 
   const isActive = phase === 'Clarify';
 
-  const handleNext = () => {
+  const handleNext = async () => {
     setPhase('Agent');
+    const { rawIdeas, answers, addLog, setGenerationResult, clearLogs } = useMapStore.getState();
+    clearLogs();
+
+    try {
+      const response = await fetch('http://localhost:8000/api/generate/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ raw_ideas: rawIdeas, user_answers: answers }),
+      });
+
+      if (!response.body) throw new Error("No readable stream");
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        
+        buffer += decoder.decode(value, { stream: true });
+        const parts = buffer.split('\r\n\r\n');
+        buffer = parts.pop() || ''; // keep the last incomplete chunk
+
+        for (const block of parts) {
+          const lines = block.split('\r\n');
+          let eventType = 'message';
+          let data = '';
+
+          for (const line of lines) {
+            if (line.startsWith('event: ')) eventType = line.substring(7);
+            if (line.startsWith('data: ')) data = line.substring(6);
+          }
+
+          if (data) {
+            if (eventType === 'log') {
+              addLog(JSON.parse(data));
+            } else if (eventType === 'complete') {
+              const res = JSON.parse(data);
+              if (res.needs_clarification && res.clarification_question) {
+                const store = useMapStore.getState();
+                store.setQuestions([
+                  ...store.questions,
+                  { id: `clarify_${Date.now()}`, text: `AMBIGUITY DETECTED: ${res.clarification_question}`, type: 'text' }
+                ]);
+                store.setPhase('Clarify');
+              } else {
+                setGenerationResult(res.map, res.score, res.feedback);
+                useMapStore.getState().setPhase('Done');
+              }
+            } else if (eventType === 'error') {
+              console.error("Generator error:", data);
+            }
+          }
+        }
+      }
+    } catch (e) {
+      console.error("Failed to generate map:", e);
+    }
   };
 
   // Only render the wrapper if there are questions or we are in Clarify phase

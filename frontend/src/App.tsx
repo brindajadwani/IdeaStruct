@@ -151,16 +151,64 @@ function App() {
               </div>
             </div>
 
-            {/* Canvas Placeholder */}
-            <div className="flex-1 relative rounded-xl bg-white/60 border border-slate-200/60 shadow-inner flex flex-col items-center justify-center overflow-hidden">
+            {/* Canvas Placeholder & Agent Log UI */}
+            <div className="flex-1 relative rounded-xl bg-white/60 border border-slate-200/60 shadow-inner flex flex-col items-center justify-center overflow-hidden p-6">
 
-              {phase === 'Agent' ? (
-                <div className="flex flex-col items-center animate-pulse">
-                  <BrainCircuit className="w-16 h-16 text-indigo-400 mb-4 animate-bounce" />
-                  <p className="text-slate-600 font-bold text-lg">Agent is structuring your map...</p>
+              {phase === 'Agent' || phase === 'Done' ? (
+                <div className="w-full max-w-2xl flex flex-col h-full bg-slate-900/90 backdrop-blur-md rounded-2xl border border-slate-700 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95">
+                  <div className="p-4 border-b border-slate-700 bg-slate-800/50 flex justify-between items-center">
+                    <div className="flex items-center gap-2 text-indigo-300">
+                      <BrainCircuit className={`w-5 h-5 ${phase === 'Agent' ? 'animate-spin' : ''}`} />
+                      <span className="font-bold text-sm tracking-wider uppercase">
+                        {phase === 'Agent' ? 'Agentic ReAct Loop Running' : 'Generation Complete'}
+                      </span>
+                    </div>
+                    {phase === 'Done' && (
+                      <div className="px-3 py-1 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-full text-xs font-bold uppercase tracking-widest flex items-center gap-1">
+                        Score: {useMapStore.getState().score}/100
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Log Stream */}
+                  <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
+                    {useMapStore.getState().logs.map((log, i) => (
+                      <div key={i} className="flex flex-col animate-in slide-in-from-right-4 fade-in">
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">
+                          {log.type}
+                        </span>
+                        <div className={`p-3 rounded-lg border text-sm shadow-sm ${
+                          log.type === 'reasoner' ? 'bg-indigo-500/10 border-indigo-500/20 text-indigo-100' :
+                          log.type === 'generator' ? 'bg-cyan-500/10 border-cyan-500/20 text-cyan-100' :
+                          log.type === 'tester' ? 'bg-fuchsia-500/10 border-fuchsia-500/20 text-fuchsia-100' :
+                          'bg-slate-800 border-slate-700 text-slate-300'
+                        }`}>
+                          {log.message}
+                        </div>
+                      </div>
+                    ))}
+                    {phase === 'Agent' && (
+                      <div className="flex gap-1 items-center p-2 text-slate-500">
+                        <div className="w-2 h-2 bg-indigo-500 rounded-full animate-ping"></div>
+                        <span className="text-xs italic ml-2">Waiting for next action...</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Final Evaluation Feedback */}
+                  {phase === 'Done' && (
+                     <div className="p-4 bg-slate-800/80 border-t border-slate-700">
+                       <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Tester Final Feedback</h4>
+                       <p className="text-sm text-slate-200">{useMapStore.getState().feedback}</p>
+                       <div className="mt-4 p-3 bg-black/40 border border-white/5 rounded-lg">
+                         <pre className="text-[10px] text-emerald-400 font-mono overflow-hidden truncate">
+                            {JSON.stringify(useMapStore.getState().finalMap, null, 2).substring(0, 200)}...
+                         </pre>
+                         <p className="text-xs text-slate-500 mt-2 text-center">Interactive Canvas coming in Iteration 4!</p>
+                       </div>
+                     </div>
+                  )}
                 </div>
-              ) : phase === 'Done' ? (
-                <p className="text-emerald-600 font-bold text-lg">Map ready (Iteration 4 Canvas goes here)</p>
               ) : (
                 <div className="text-center opacity-30">
                   <BrainCircuit className="w-32 h-32 text-slate-400 mx-auto mb-6" />
